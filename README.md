@@ -10,7 +10,7 @@ A cash register web service.
 
 ### New order
 
-    curl -XPUT localhost:8080/orders
+    ORDER_ID=$(curl -XPUT localhost:8080/orders)
 
 ### Add new item to an order
 

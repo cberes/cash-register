@@ -1,20 +1,27 @@
 package net.seabears.register.orders;
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.PersistTo;
 import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.query.Query;
 import com.couchbase.client.java.query.QueryResult;
+import net.seabears.register.BadRequestException;
 import net.seabears.register.DocumentType;
+import net.seabears.register.NotFoundException;
 import net.seabears.register.OrderIdSupplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import static com.couchbase.client.java.query.Select.select;
 import static com.couchbase.client.java.query.dsl.Expression.i;
 import static com.couchbase.client.java.query.dsl.Expression.s;
 import static com.couchbase.client.java.query.dsl.Expression.x;
+import static java.util.stream.IntStream.range;
 
 @RestController
 @RequestMapping("/orders")
@@ -44,15 +51,46 @@ public class OrderController {
         order.put("id", id);
         order.put("type", DocumentType.ORDER.toString());
         order.put("number", number);
+        order.put("items", JsonArray.empty());
         return order;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public int addItem(@PathVariable String id, @RequestBody Quantity quantity) {
-        JsonObject orderItem = buildOrderItem(id, quantity.itemId);
-        final String key = getOrderItemKey(id, quantity.itemId);
-        bucket.insert(JsonDocument.create(key, orderItem), PersistTo.MASTER);
-        return getOrderTotal(id);
+        final String key = getOrderKey(id);
+        JsonDocument doc = bucket.get(key);
+        if (doc == null) {
+            throw new NotFoundException("order " + id + " not found");
+        }
+
+        JsonObject order = doc.content();
+        if (order.getInt("number") != 0) {
+            throw new BadRequestException("cannot modify a submitted order");
+        }
+
+        JsonArray items = order.getArray("items");
+        boolean containsItem = range(0, items.size())
+                .mapToObj(items::getObject)
+                .anyMatch(obj -> obj.getInt("id") == quantity.itemId);
+        if (containsItem) {
+            throw new BadRequestException("item " + quantity.itemId + " is already on the order");
+        }
+
+        JsonObject item = JsonObject.empty();
+        item.put("id", quantity.itemId);
+        item.put("price", getItem(quantity.itemId).getInt("price"));
+        item.put("quantity", 1);
+        items.add(item);
+        bucket.upsert(JsonDocument.create(key, order));
+        return getOrderTotal(order);
+    }
+
+    private JsonObject getItem(int id) {
+        JsonDocument itemDoc = bucket.get(DocumentType.ITEM + "_" + id);
+        if (itemDoc == null) {
+            throw new NotFoundException("item " + id + " not found");
+        }
+        return itemDoc.content();
     }
 
     private JsonObject buildOrderItem(String orderId, long itemId) {
@@ -76,40 +114,86 @@ public class OrderController {
         return String.format("%s_%s:%d", DocumentType.ORDER_ITEM, orderId, itemId);
     }
 
-    private int getOrderTotal(String orderId) {
-        Query query = Query.simple(select("IFNULL(SUM(i.price * o.quantity), 0) as subtotal")
-                .from(i(bucket.name()).as("o"))
-                .innerJoin(i(bucket.name()).as("i") + " ON KEYS o.item_id")
-                .where(x("o.type").eq(s(DocumentType.ORDER_ITEM.toString())).and(x("o.order_id").eq(s(DocumentType.ORDER + "_" + orderId)))));
-        System.out.println(query.statement());
-        QueryResult result = bucket.query(query);
-        System.out.println(result.errors());
-        System.out.println(result.finalSuccess());
-        return result
-                .allRows().get(0)
-                .value().getInt("subtotal");
+    private int getOrderTotal(JsonObject order) {
+        final JsonArray items = order.getArray("items");
+        return range(0, items.size())
+                .mapToObj(items::getObject)
+                .mapToInt(item -> item.getInt("price") * item.getInt("quantity"))
+                .sum();
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public int updateItem(@PathVariable String id, @RequestBody Quantity quantity) {
-        JsonObject orderItem = buildOrderItem(id, quantity.itemId, quantity.amount);
-        final String key = getOrderItemKey(id, quantity.itemId);
-        bucket.upsert(JsonDocument.create(key, orderItem), PersistTo.MASTER);
-        return getOrderTotal(id);
+        final String key = getOrderKey(id);
+        JsonDocument doc = bucket.get(key);
+        if (doc == null) {
+            throw new NotFoundException("order " + id + " not found");
+        }
+
+        JsonObject order = doc.content();
+        if (order.getInt("number") != 0) {
+            throw new BadRequestException("cannot modify a submitted order");
+        }
+
+        JsonArray items = order.getArray("items");
+        Optional<JsonObject> optItem = range(0, items.size())
+                .mapToObj(items::getObject)
+                .filter(obj -> obj.getInt("id") == quantity.itemId)
+                .findFirst();
+        JsonObject item;
+        if (optItem.isPresent()) {
+            item = optItem.get();
+        } else {
+            item = JsonObject.empty();
+            items.add(item);
+            item.put("id", quantity.itemId);
+            item.put("price", getItem(quantity.itemId).getInt("price"));
+        }
+        item.put("quantity", quantity.amount);
+        bucket.upsert(JsonDocument.create(key, order));
+        return getOrderTotal(order);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public int deleteItem(@PathVariable String id, @RequestBody Quantity quantity) {
-        final String key = getOrderItemKey(id, quantity.itemId);
-        bucket.remove(key, PersistTo.MASTER);
-        return getOrderTotal(id);
+        final String key = getOrderKey(id);
+        JsonDocument doc = bucket.get(key);
+        if (doc == null) {
+            throw new NotFoundException("order " + id + " not found");
+        }
+
+        JsonObject order = doc.content();
+        if (order.getInt("number") != 0) {
+            throw new BadRequestException("cannot modify a submitted order");
+        }
+
+        final JsonArray items = order.getArray("items");
+        final JsonArray newItems = JsonArray.empty();
+        range(0, items.size())
+                .mapToObj(items::getObject)
+                .filter(obj -> obj.getInt("id") != quantity.itemId)
+                .forEach(newItems::add);
+        order.put("items", newItems);
+        bucket.upsert(JsonDocument.create(key, order));
+        return getOrderTotal(order);
     }
 
     @RequestMapping(value = "/{id}/submit", method = RequestMethod.POST)
     public int submit(@PathVariable String id) {
+        final String key = getOrderKey(id);
+        JsonDocument doc = bucket.get(key);
+        if (doc == null) {
+            throw new NotFoundException("order " + id + " not found");
+        }
+
+        JsonObject order = doc.content();
+        if (order.getInt("number") != 0) {
+            throw new BadRequestException("cannot modify a submitted order");
+        }
+
         final int number = (int) (bucket.counter("order_number", 1).content() % MAX_ORDER_NUM + 1L);
-        JsonObject order = buildOrder(id, number);
-        bucket.upsert(JsonDocument.create(getOrderKey(id), order));
+        order.put("number", number);
+        bucket.upsert(JsonDocument.create(key, order));
         return number;
     }
 }

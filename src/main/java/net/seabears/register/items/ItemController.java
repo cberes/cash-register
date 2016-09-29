@@ -37,7 +37,7 @@ public class ItemController {
     private static Item toItem(QueryRow row) {
         final JsonObject json = row.value();
         final Item item = new Item();
-        item.id = json.getLong("id");
+        item.id = json.getInt("id");
         item.name = json.getString("name");
         item.price = json.getInt("price");
         return item;
