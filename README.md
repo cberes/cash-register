@@ -10,7 +10,7 @@ A cash register web service.
 
 ### New order
 
-    ORDER_ID=$(curl -XPOST localhost:8080/orders -d'{"tax":0.09}' -H"Content-Type: application/json")
+    curl -XPOST localhost:8080/orders -d'{"tax":0.09}' -H"Content-Type: application/json"
 
 ### Add new item to an order
 

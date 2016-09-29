@@ -5,6 +5,10 @@ import net.seabears.register.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+import static java.util.Collections.singletonMap;
+
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -12,9 +16,10 @@ public class OrderController {
     private DataStore data;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public String order(@RequestBody Tax tax) {
+    public Map<String, String> order(@RequestBody Tax tax) {
         exitIfInvalidTax(tax.tax);
-        return data.createOrder(tax).getId();
+        final String id = data.createOrder(tax).getId();
+        return singletonMap("id", id);
     }
 
     private static void exitIfInvalidTax(double tax) {
@@ -82,12 +87,12 @@ public class OrderController {
     }
 
     @RequestMapping(value = "/{id}/submit", method = RequestMethod.POST)
-    public int submit(@PathVariable String id) {
+    public Map<String, Integer> submit(@PathVariable String id) {
         final Order order = getOrderOrExit(id);
         final int number = data.incrementAndGetOrderNumber();
         order.setNumber(number);
         data.updateOrder(id, order);
-        return number;
+        return singletonMap("number", number);
     }
 }
 
