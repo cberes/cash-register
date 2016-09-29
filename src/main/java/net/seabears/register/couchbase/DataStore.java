@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,7 +70,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
     }
 
     @Override
-    public void createPayment(Payment payment) {
+    public void createPayment(@NotNull Payment payment) {
         final String id = paymentIdSupplier.get();
         JsonObject tender = paymentToJson(id, payment);
         bucket.insert(JsonDocument.create(Keys.tender(id), tender));
@@ -85,7 +86,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
     }
 
     @Override
-    public Order createOrder(OrderConfig orderConfig) {
+    public Order createOrder(@NotNull OrderConfig orderConfig) {
         final String id = orderIdSupplier.get();
         final Order order = new Order(id, orderConfig.tax);
         bucket.insert(JsonDocument.create(Keys.order(id), order.json));
@@ -93,7 +94,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
     }
 
     @Override
-    public Order getOrder(String id) {
+    public Order getOrder(@NotNull String id) {
         return Optional.ofNullable(bucket.get(Keys.order(id)))
                 .map(JsonDocument::content)
                 .map(Order::new)
@@ -101,7 +102,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
     }
 
     @Override
-    public void updateOrder(String id, net.seabears.register.core.Order order) {
+    public void updateOrder(@NotNull String id, @NotNull net.seabears.register.core.Order order) {
         bucket.upsert(JsonDocument.create(Keys.order(id), ((Order) order).json));
     }
 

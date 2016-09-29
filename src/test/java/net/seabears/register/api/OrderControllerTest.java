@@ -133,6 +133,7 @@ public class OrderControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void updateItem() throws Exception {
         final int amount = 2;
         Order order = order(90, 10);

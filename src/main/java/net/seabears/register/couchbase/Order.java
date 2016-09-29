@@ -4,7 +4,9 @@ import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import net.seabears.register.core.Item;
 import net.seabears.register.core.OrderTotal;
+import org.springframework.util.Assert;
 
+import javax.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -15,6 +17,8 @@ class Order implements net.seabears.register.core.Order {
 
     Order(String id, double tax) {
         this(JsonObject.empty());
+        Assert.hasText(id, "id must have text");
+        Assert.isTrue(tax >= 0.0, "tax cannot be negative");
         json.put("id", id);
         json.put("type", DocumentType.ORDER.toString());
         json.put("tax", tax);
@@ -22,7 +26,7 @@ class Order implements net.seabears.register.core.Order {
         json.put("items", JsonArray.empty());
     }
 
-    Order(JsonObject json) {
+    Order(@NotNull JsonObject json) {
         this.json = json;
     }
 
@@ -38,6 +42,7 @@ class Order implements net.seabears.register.core.Order {
 
     @Override
     public void setNumber(int number) {
+        Assert.isTrue(number >= 0, "number cannot be negative");
         json.put("number", number);
     }
 
@@ -82,7 +87,8 @@ class Order implements net.seabears.register.core.Order {
     }
 
     @Override
-    public void addItem(Item item, int quantity) {
+    public void addItem(@NotNull Item item, int quantity) {
+        Assert.isTrue(quantity > 0, "quantity must be positive");
         final JsonArray items = getItems();
         final JsonObject jsonItem = JsonObject.empty();
         jsonItem.put("id", item.getId());
@@ -92,7 +98,8 @@ class Order implements net.seabears.register.core.Order {
     }
 
     @Override
-    public void updateItem(int id, int quantity, Function<Integer, Item> itemFunc) {
+    public void updateItem(int id, int quantity, @NotNull Function<Integer, Item> itemFunc) {
+        Assert.isTrue(quantity > 0, "quantity must be positive");
         final Optional<JsonObject> item = findItem(id);
         if (item.isPresent()) {
             item.get().put("quantity", quantity);
