@@ -1,5 +1,6 @@
 package net.seabears.register.api;
 
+import net.seabears.register.api.errors.*;
 import net.seabears.register.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,24 +29,24 @@ public class OrderController {
     private Order getOrderOrExit(String id) {
         final Order order = data.getOrder(id);
         if (order == null) {
-            throw new NotFoundException("order " + id + " not found");
+            throw new OrderNotFoundException("order " + id + " not found");
         }
         if (order.isSubmitted()) {
-            throw new BadRequestException("cannot modify a submitted order");
+            throw new SubmittedOrderModificationException("order " + id + " was already submitted");
         }
         return order;
     }
 
     private void exitIfOrderContainsItem(Order order, int id) {
         if (order.containsItem(id)) {
-            throw new BadRequestException("item " + id + " is already on the order");
+            throw new DuplicateItemException("item " + id + " is already on the order");
         }
     }
 
     private Item getItemOrExit(int id) {
         final Item item = data.getItem(id);
         if (item == null) {
-            throw new NotFoundException("item " + id + " not found");
+            throw new ItemNotFoundException("item " + id + " not found");
         }
         return item;
     }
@@ -61,7 +62,7 @@ public class OrderController {
 
     private void exitIfInvalidQuantity(int quantity) {
         if (quantity < 1) {
-            throw new BadRequestException("quantity was " + quantity + " but must be > 0");
+            throw new InvalidQuantityException("quantity was " + quantity + " but must be > 0");
         }
     }
 
