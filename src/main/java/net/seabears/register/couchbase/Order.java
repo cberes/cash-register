@@ -13,6 +13,15 @@ import static java.util.stream.IntStream.range;
 class Order implements net.seabears.register.core.Order {
     final JsonObject json;
 
+    Order(String id, double tax) {
+        this(JsonObject.empty());
+        json.put("id", id);
+        json.put("type", DocumentType.ORDER.toString());
+        json.put("tax", tax);
+        json.put("number", 0);
+        json.put("items", JsonArray.empty());
+    }
+
     Order(JsonObject json) {
         this.json = json;
     }
@@ -76,8 +85,8 @@ class Order implements net.seabears.register.core.Order {
     public void addItem(Item item, int quantity) {
         final JsonArray items = getItems();
         final JsonObject jsonItem = JsonObject.empty();
-        jsonItem.put("id", item.id);
-        jsonItem.put("price", item.price);
+        jsonItem.put("id", item.getId());
+        jsonItem.put("price", item.getPrice());
         jsonItem.put("quantity", quantity);
         items.add(jsonItem);
     }

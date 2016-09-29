@@ -16,9 +16,9 @@ public class OrderController {
     private DataStore data;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public Map<String, String> order(@RequestBody Tax tax) {
-        exitIfInvalidTax(tax.tax);
-        final String id = data.createOrder(tax).getId();
+    public Map<String, String> order(@RequestBody OrderConfig orderConfig) {
+        exitIfInvalidTax(orderConfig.tax);
+        final String id = data.createOrder(orderConfig).getId();
         return singletonMap("id", id);
     }
 

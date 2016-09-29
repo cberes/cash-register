@@ -1,9 +1,9 @@
-package net.seabears.register.core;
+package net.seabears.register.couchbase;
 
 import java.util.Locale;
 
-public enum DocumentType {
-    ITEM, ORDER, ORDER_ITEM, TENDER;
+enum DocumentType {
+    ITEM, ORDER, TENDER;
 
     public String toString() {
         return name().toLowerCase(Locale.ENGLISH);
