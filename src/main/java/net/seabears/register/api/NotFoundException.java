@@ -1,4 +1,4 @@
-package net.seabears.register;
+package net.seabears.register.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

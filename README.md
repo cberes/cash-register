@@ -30,7 +30,7 @@ A cash register web service.
 
 ### Tender paymanet
 
-    curl -XPOST localhost:8080/tender -d'{"order_id":"$ORDER_ID","amount":1899,"method":"CASH"}' -H"Content-Type: application/json"
+    curl -XPOST localhost:8080/tender -d'{"order_id":"'$ORDER_ID'","amount":1899,"method":"CASH"}' -H"Content-Type: application/json"
 
 ## Configuration
 

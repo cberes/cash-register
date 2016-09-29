@@ -1,4 +1,4 @@
-package net.seabears.register.tender;
+package net.seabears.register;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;

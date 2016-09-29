@@ -1,4 +1,4 @@
-package net.seabears.register.tender;
+package net.seabears.register.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

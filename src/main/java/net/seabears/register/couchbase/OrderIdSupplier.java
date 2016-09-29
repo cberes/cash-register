@@ -1,4 +1,4 @@
-package net.seabears.register;
+package net.seabears.register.couchbase;
 
 import org.springframework.stereotype.Component;
 
