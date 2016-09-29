@@ -5,6 +5,7 @@ import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -20,12 +21,12 @@ public class Configuration {
     }
 
     @Bean
-    public Cluster couchbaseCluster() {
-        return CouchbaseCluster.create();
+    public Cluster couchbaseCluster(@Value("${cb.conn}") String connectionString) {
+        return CouchbaseCluster.fromConnectionString(connectionString);
     }
 
     @Bean
-    public Bucket bucket(Cluster cluster) {
-        return cluster.openBucket("cash-register", "cash-register-123");
+    public Bucket bucket(Cluster cluster, @Value("${cb.bucket}") String bucket, @Value("${cb.password}") String password) {
+        return cluster.openBucket(bucket, password);
     }
 }

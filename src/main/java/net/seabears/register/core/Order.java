@@ -6,7 +6,7 @@ public interface Order {
     String getId();
     boolean isSubmitted();
     void setNumber(int number);
-    int getTotal();
+    OrderTotal getTotal();
     void removeItem(int id);
     boolean containsItem(int id);
     void addItem(Item item, int quantity);

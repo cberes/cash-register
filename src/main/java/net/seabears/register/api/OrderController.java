@@ -11,13 +11,20 @@ public class OrderController {
     @Autowired
     private DataStore data;
 
-    @RequestMapping(value = "", method = RequestMethod.PUT)
-    public String newOrder() {
-        return data.createOrder().getId();
+    @RequestMapping(value = "", method = RequestMethod.POST)
+    public String order(@RequestBody Tax tax) {
+        exitIfInvalidTax(tax.tax);
+        return data.createOrder(tax).getId();
+    }
+
+    private static void exitIfInvalidTax(double tax) {
+        if (tax < 0.0) {
+            throw new InvalidTaxException("tax was " + tax + " but must be >= 0");
+        }
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public int addItem(@PathVariable String id, @RequestBody Quantity quantity) {
+    public OrderTotal addItem(@PathVariable String id, @RequestBody Quantity quantity) {
         final Order order = getOrderOrExit(id);
         exitIfOrderContainsItem(order, quantity.itemId);
         final Item item = getItemOrExit(quantity.itemId);
@@ -37,7 +44,7 @@ public class OrderController {
         return order;
     }
 
-    private void exitIfOrderContainsItem(Order order, int id) {
+    private static void exitIfOrderContainsItem(Order order, int id) {
         if (order.containsItem(id)) {
             throw new DuplicateItemException("item " + id + " is already on the order");
         }
@@ -52,7 +59,7 @@ public class OrderController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public int updateItem(@PathVariable String id, @RequestBody Quantity quantity) {
+    public OrderTotal updateItem(@PathVariable String id, @RequestBody Quantity quantity) {
         exitIfInvalidQuantity(quantity.amount);
         final Order order = getOrderOrExit(id);
         order.updateItem(quantity.itemId, quantity.amount, this::getItemOrExit);
@@ -60,14 +67,14 @@ public class OrderController {
         return order.getTotal();
     }
 
-    private void exitIfInvalidQuantity(int quantity) {
+    private static void exitIfInvalidQuantity(int quantity) {
         if (quantity < 1) {
             throw new InvalidQuantityException("quantity was " + quantity + " but must be > 0");
         }
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public int deleteItem(@PathVariable String id, @RequestBody Quantity quantity) {
+    public OrderTotal deleteItem(@PathVariable String id, @RequestBody Quantity quantity) {
         final Order order = getOrderOrExit(id);
         order.removeItem(quantity.itemId);
         data.updateOrder(id, order);

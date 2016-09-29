@@ -9,7 +9,9 @@ import com.couchbase.client.java.query.QueryRow;
 import net.seabears.register.core.DocumentType;
 import net.seabears.register.core.Item;
 import net.seabears.register.core.Payment;
+import net.seabears.register.core.Tax;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -37,7 +39,8 @@ public class DataStore implements net.seabears.register.core.DataStore {
         }
     }
 
-    private static final long MAX_ORDER_NUM = 100L;
+    @Value("${order.num.max}")
+    private long orderNumMax;
 
     @Autowired
     private Bucket bucket;
@@ -94,11 +97,12 @@ public class DataStore implements net.seabears.register.core.DataStore {
     }
 
     @Override
-    public Order createOrder() {
+    public Order createOrder(Tax tax) {
         final JsonObject order = JsonObject.empty();
         final String id = orderIdSupplier.get();
         order.put("id", id);
         order.put("type", DocumentType.ORDER.toString());
+        order.put("tax", tax.tax);
         order.put("number", 0);
         order.put("items", JsonArray.empty());
         bucket.insert(JsonDocument.create(Keys.order(id), order));
@@ -120,6 +124,6 @@ public class DataStore implements net.seabears.register.core.DataStore {
 
     @Override
     public int incrementAndGetOrderNumber() {
-        return (int) (bucket.counter("order_number", 1).content() % MAX_ORDER_NUM + 1L);
+        return (int) (bucket.counter("order_number", 1).content() % orderNumMax + 1L);
     }
 }

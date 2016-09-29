@@ -3,6 +3,7 @@ package net.seabears.register.couchbase;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 import net.seabears.register.core.Item;
+import net.seabears.register.core.OrderTotal;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,12 +33,15 @@ class Order implements net.seabears.register.core.Order {
     }
 
     @Override
-    public int getTotal() {
+    public OrderTotal getTotal() {
+        final OrderTotal total = new OrderTotal();
         final JsonArray items = getItems();
-        return range(0, items.size())
+        total.subtotal = range(0, items.size())
                 .mapToObj(items::getObject)
                 .mapToInt(item -> item.getInt("price") * item.getInt("quantity"))
                 .sum();
+        total.tax = (int) Math.floor(total.subtotal * json.getDouble("tax"));
+        return total;
     }
 
     private JsonArray getItems() {
