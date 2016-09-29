@@ -1,0 +1,145 @@
+CREATE PRIMARY INDEX on `cash-register`;
+INSERT INTO `cash-register` ( KEY, VALUE ) 
+  VALUES
+  (
+  "item_1",
+  {
+    "id": 1,
+    "type": "item",
+    "name": "Supreme Pizza",
+    "price": 1699
+  }),(
+  "item_2",
+  {
+    "id": 2,
+    "type": "item",
+    "name": "BBQ Chicken Pizza",
+    "price": 1499
+  }),(
+  "item_3",
+  {
+    "id": 3,
+    "type": "item",
+    "name": "Veggie Pizza",
+    "price": 1299
+  }),(
+  "item_4",
+  {
+    "id": 4,
+    "type": "item",
+    "name": "Meat Lover's Pizza",
+    "price": 1799
+  }),(
+  "item_5",
+  {
+    "id": 5,
+    "type": "item",
+    "name": "Hawaiian Pizza",
+    "price": 1499
+  }),(
+  "item_6",
+  {
+    "id": 6,
+    "type": "item",
+    "name": "Supreme Calzone",
+    "price": 899
+  }),(
+  "item_7",
+  {
+    "id": 7,
+    "type": "item",
+    "name": "BBQ Chicken Calzone",
+    "price": 799
+  }),(
+  "item_8",
+  {
+    "id": 8,
+    "type": "item",
+    "name": "Veggie Calzone",
+    "price": 699
+  }),(
+  "item_9",
+  {
+    "id": 9,
+    "type": "item",
+    "name": "Meat Lover's Calzone",
+    "price": 899
+  }),(
+  "item_10",
+  {
+    "id": 10,
+    "type": "item",
+    "name": "Hawaiian Calzone",
+    "price": 799
+  }),(
+  "item_11",
+  {
+    "id": 11,
+    "type": "item",
+    "name": "Side Salad",
+    "price": 399
+  }),(
+  "item_12",
+  {
+    "id": 12,
+    "type": "item",
+    "name": "Caesar Salad",
+    "price": 499
+  }),(
+  "item_13",
+  {
+    "id": 13,
+    "type": "item",
+    "name": "Cobb Salad",
+    "price": 499
+  }),(
+  "item_14",
+  {
+    "id": 14,
+    "type": "item",
+    "name": "Chef Salad",
+    "price": 599
+  }),(
+  "item_15",
+  {
+    "id": 15,
+    "type": "item",
+    "name": "Grilled Cheese",
+    "price": 399
+  }),(
+  "item_16",
+  {
+    "id": 16,
+    "type": "item",
+    "name": "Coke",
+    "price": 100
+  }),(
+  "item_17",
+  {
+    "id": 17,
+    "type": "item",
+    "name": "Diet Coke",
+    "price": 100
+  }),(
+  "item_18",
+  {
+    "id": 18,
+    "type": "item",
+    "name": "Sprite",
+    "price": 100
+  }),(
+  "item_19",
+  {
+    "id": 19,
+    "type": "item",
+    "name": "Dr. Pepper",
+    "price": 100
+  }),(
+  "item_20",
+  {
+    "id": 20,
+    "type": "item",
+    "name": "Root Beer",
+    "price": 100
+  })
+RETURNING META().id as docid, *;
