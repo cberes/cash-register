@@ -21,8 +21,7 @@ public class TenderController {
     @RequestMapping(value = "", method = RequestMethod.POST)
     public void pay(@RequestBody Payment payment) {
         exitIfInvalidPaymentAmount(payment.amount);
-        final Order order = getOrderOrExit(payment.orderId);
-        exitIfInsufficientPaymentAmount(order.getTotal(), payment.amount);
+        exitIfOrderMissing(payment.orderId);
         data.createPayment(payment);
     }
 
@@ -32,18 +31,9 @@ public class TenderController {
         }
     }
 
-    private Order getOrderOrExit(String id) {
-        final Order order = data.getOrder(id);
-        if (order == null) {
+    private void exitIfOrderMissing(String id) {
+        if (data.getOrder(id) == null) {
             throw new OrderNotFoundException("order " + id + " not found");
-        }
-        return order;
-    }
-
-    private static void exitIfInsufficientPaymentAmount(OrderTotal total, int amount) {
-        final int totalWithTax = total.subtotal + total.tax;
-        if (amount < totalWithTax) {
-            throw new InvalidPaymentException("amount was " + amount + " but must be >= " + totalWithTax);
         }
     }
 }

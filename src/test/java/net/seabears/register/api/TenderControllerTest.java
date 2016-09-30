@@ -44,16 +44,16 @@ public class TenderControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    public void payOrderNotFound() throws Exception {
-        given(data.getOrder(ORDER_ID)).willReturn(null);
-        makeRequest(pay(100)).andExpect(status().is4xxClientError());
-        verify(data, never()).createPayment(any(Payment.class));
+    public void payInsufficient() throws Exception {
+        order(100, 10);
+        makeRequest(pay(109)).andExpect(status().isOk());
+        verify(data).createPayment(any(Payment.class));
     }
 
     @Test
-    public void payInsufficient() throws Exception {
-        order(100, 10);
-        makeRequest(pay(109)).andExpect(status().is4xxClientError());
+    public void payOrderNotFound() throws Exception {
+        given(data.getOrder(ORDER_ID)).willReturn(null);
+        makeRequest(pay(100)).andExpect(status().is4xxClientError());
         verify(data, never()).createPayment(any(Payment.class));
     }
 
