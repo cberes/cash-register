@@ -2,6 +2,34 @@
 
 A cash register web service
 
+## Usage
+
+Build and start the service (on port 8080 by default):
+
+    ./gradlew build && java -jar build/libs/cash-register-0.0.1.jar
+
+## Configuration
+
+0. Couchbase connection string: `cb.conn` (default is `couchbase://localhost`)
+0. Couchbase bucket name: `cb.bucket` (default is `cash-register`)
+0. Couchbase password: `cb.password` (default is `cash-register-123`)
+0. Maximum order number: `order.num.max` (default is 100)
+
+Spring looks for the configuration file `application.properties` in the current directory or a `config` directory within the current directory.
+
+## Dependencies
+
+### Couchbase
+
+To run a Couchbase server in a Docker container:
+
+    docker pull couchbase/server
+    docker run -d --name db -p 8091-8094:8091-8094 -p 11210:11210 couchbase
+
+The server will be accessible via HTTP at `http://localhost:8091` or from the console via `docker exec -it db sh`.
+
+The file `src/test/resources/items.n1ql` contains queries to populate a bucket with items.
+
 ## Examples
 
 ### Get items
@@ -31,25 +59,3 @@ A cash register web service
 ### Tender payment
 
     curl -XPOST localhost:8080/tender -d'{"order_id":"'$ORDER_ID'","amount":1899,"method":"CASH"}' -H"Content-Type: application/json"
-
-## Configuration
-
-0. Couchbase connection string: `cb.conn` (default is `couchbase://localhost`)
-0. Couchbase bucket name: `cb.bucket` (default is `cash-register`)
-0. Couchbase password: `cb.password` (default is `cash-register-123`)
-0. Maximum order number: `order.num.max` (default is 100)
-
-Spring looks for the configuration file `application.properties` in the current directory or a `config` directory within the current directory.
-
-## Dependencies
-
-### Couchbase
-
-To run a Couchbase server in a Docker container:
-
-    docker pull couchbase/server
-    docker run -d --name db -p 8091-8094:8091-8094 -p 11210:11210 couchbase
-
-The server will be accessible via HTTP at `http://localhost:8091` or from the console via `docker exec -it db sh`.
-
-The file `src/test/resources/items.n1ql` contains queries to populate a bucket with items.
