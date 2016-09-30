@@ -34,8 +34,11 @@ A cash register web service.
 
 ## Configuration
 
-0. Couchbase URL
-0. Tax?
+0. Couchbase connection string: `cb.conn` (default is `couchbase://localhost`)
+0. Couchbase bucket name: `cb.bucket` (default is `cash-register`)
+0. Couchbase password: `cb.password` (default is `cash-register-123`)
+0. Maximum order number: `order.num.max` (default is 100)
+
 
 ## Dependencies
 
