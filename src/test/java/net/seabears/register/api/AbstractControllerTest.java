@@ -1,5 +1,7 @@
 package net.seabears.register.api;
 
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.seabears.register.core.*;
 import org.junit.runner.RunWith;
@@ -33,6 +35,14 @@ abstract class AbstractControllerTest {
         this.ITEM_ID = itemId;
         this.ORDER_ID = orderId;
     }
+
+    /** This is mocked here so that Spring doesn't try to connect to the real database. */
+    @MockBean
+    private Cluster cluster;
+
+    /** This is mocked here so that Spring doesn't try to connect to the real database. */
+    @MockBean
+    private Bucket bucket;
 
     @MockBean
     protected DataStore data;
