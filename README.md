@@ -1,6 +1,6 @@
 # cash-register
 
-A cash register web service.
+A cash register web service
 
 ## Examples
 
@@ -38,7 +38,6 @@ A cash register web service.
 0. Couchbase bucket name: `cb.bucket` (default is `cash-register`)
 0. Couchbase password: `cb.password` (default is `cash-register-123`)
 0. Maximum order number: `order.num.max` (default is 100)
-
 
 ## Dependencies
 
