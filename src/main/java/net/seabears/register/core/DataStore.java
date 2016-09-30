@@ -17,6 +17,9 @@ public interface DataStore {
     /** Creates the specified payment */
     void createPayment(Payment payment);
 
+    /** Returns the total amount of payments for the order with the specified ID */
+    int getTotalPaid(String id);
+
     /** Creates and returns the order with specified configuration */
     Order createOrder(OrderConfig orderConfig);
 

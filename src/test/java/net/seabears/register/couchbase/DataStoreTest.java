@@ -114,6 +114,24 @@ public class DataStoreTest {
         assertThat(doc.getValue().content().getString("order_id"), equalTo("order_" + expected.orderId));
     }
 
+    private JsonObject makePayment(String id, String orderId, int amount) {
+        JsonObject json = JsonObject.empty();
+        json.put("id", id);
+        json.put("order_id", "order_" + orderId);
+        json.put("amount", amount);
+        json.put("method", "CASH");
+        return json;
+    }
+
+    @Test
+    public void getTotalPaid() {
+        final String orderId = "51";
+        List<JsonObject> payments = Arrays.asList(makePayment("1", orderId, 100), makePayment("2", orderId, 250));
+        List<QueryRow> rows = payments.stream().map(DataStoreTest::mockRow).collect(toList());
+        given(result.allRows()).willReturn(rows);
+        assertThat(data.getTotalPaid(orderId), equalTo(350));
+    }
+
     @Test
     public void createOrder() {
         final String id = "51";

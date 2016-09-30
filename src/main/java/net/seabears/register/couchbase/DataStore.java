@@ -81,9 +81,23 @@ public class DataStore implements net.seabears.register.core.DataStore {
         bucket.insert(JsonDocument.create(Keys.tender(id), tender));
     }
 
+    @Override
+    public int getTotalPaid(String id) {
+        return bucket.query(Query.simple(select(i(bucket.name()) + ".*")
+                .from(i(bucket.name()))
+                .where(x("type").eq(s(DocumentType.TENDER.toString()))
+                        .and(x("order_id").eq(s(Keys.order(id)))))))
+                .allRows()
+                .stream()
+                .map(QueryRow::value)
+                .mapToInt(json -> json.getInt("amount"))
+                .sum();
+    }
+
     private static JsonObject paymentToJson(String id, Payment payment) {
         JsonObject json = JsonObject.empty();
         json.put("id", id);
+        json.put("type", DocumentType.TENDER.toString());
         json.put("amount", payment.amount);
         json.put("method", payment.method);
         json.put("order_id", Keys.order(payment.orderId));

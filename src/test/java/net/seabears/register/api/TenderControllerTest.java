@@ -10,7 +10,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.io.IOException;
+
+import static java.util.Collections.singletonMap;
 import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -36,18 +40,38 @@ public class TenderControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
     }
 
+    private String response(int remaining) throws IOException {
+        return toJson(singletonMap("remaining", remaining));
+    }
+
     @Test
     public void pay() throws Exception {
-        order(100, 10);
-        makeRequest(pay(110)).andExpect(status().isOk());
+        Order order = order(100, 10);
+        given(order.isEmpty()).willReturn(false);
+        given(data.getTotalPaid("order_" + ORDER_ID)).willReturn(0);
+        makeRequest(pay(110))
+                .andExpect(status().isOk())
+                .andExpect(content().json(response(0)));
         verify(data).createPayment(any(Payment.class));
     }
 
     @Test
-    public void payInsufficient() throws Exception {
-        order(100, 10);
-        makeRequest(pay(109)).andExpect(status().isOk());
+    public void paySplitWithChangeDue() throws Exception {
+        Order order = order(100, 10);
+        given(order.isEmpty()).willReturn(false);
+        given(data.getTotalPaid(ORDER_ID)).willReturn(50);
+        makeRequest(pay(75))
+                .andExpect(status().isOk())
+                .andExpect(content().json(response(-15)));
         verify(data).createPayment(any(Payment.class));
+    }
+
+    @Test
+    public void payEmpty() throws Exception {
+        Order order = order(100, 10);
+        given(order.isEmpty()).willReturn(true);
+        makeRequest(pay(110)).andExpect(status().is4xxClientError());
+        verify(data, never()).createPayment(any(Payment.class));
     }
 
     @Test

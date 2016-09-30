@@ -152,7 +152,7 @@ public class OrderController {
         return singletonMap("number", number);
     }
 
-    private static void exitIfOrderIsEmpty(Order order) {
+    static void exitIfOrderIsEmpty(Order order) {
         if (order.isEmpty()) {
             throw new EmptyOrderException("order " + order.getId() + " contains no items");
         }
