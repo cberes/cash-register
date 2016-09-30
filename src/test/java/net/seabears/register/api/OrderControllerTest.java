@@ -59,6 +59,7 @@ public class OrderControllerTest extends AbstractControllerTest {
         final int expectedNumber = 1;
         Order order = order(0, 0);
         given(order.isSubmitted()).willReturn(false);
+        given(order.isEmpty()).willReturn(false);
         given(data.incrementAndGetOrderNumber()).willReturn(expectedNumber);
         request(HttpMethod.POST, "/orders/" + ORDER_ID + "/submit")
                 .andExpect(status().isOk())
@@ -68,9 +69,20 @@ public class OrderControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    public void submitEmptyOrder() throws Exception {
+        Order order = order(0, 0);
+        given(order.isSubmitted()).willReturn(false);
+        given(order.isEmpty()).willReturn(true);
+        request(HttpMethod.POST, "/orders/" + ORDER_ID + "/submit")
+                .andExpect(status().is4xxClientError());
+        verify(data, never()).updateOrder(anyString(), any(Order.class));
+    }
+
+    @Test
     public void submitSubmittedOrder() throws Exception {
         Order order = order(0, 0);
         given(order.isSubmitted()).willReturn(true);
+        given(order.isEmpty()).willReturn(false);
         request(HttpMethod.POST, "/orders/" + ORDER_ID + "/submit")
                 .andExpect(status().is4xxClientError());
         verify(data, never()).updateOrder(anyString(), any(Order.class));

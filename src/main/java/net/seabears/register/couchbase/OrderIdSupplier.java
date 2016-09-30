@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+/** Generates random UUIDs to uniquely identify orders */
 @Component
 public class OrderIdSupplier implements Supplier<String> {
     @Override

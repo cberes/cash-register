@@ -8,7 +8,7 @@ import java.util.List;
  * (Of course, accessors <em>should not</em> modify the database.)
  */
 public interface DataStore {
-    /** Returns the item with the specified ID */
+    /** Returns the item with the specified ID (or null if no item with the ID) */
     Item getItem(int id);
 
     /** Returns a list of all available items */
@@ -20,7 +20,7 @@ public interface DataStore {
     /** Creates and returns the order with specified configuration */
     Order createOrder(OrderConfig orderConfig);
 
-    /** Returns the order with the specified ID */
+    /** Returns the order with the specified ID (or null if no order with the ID) */
     Order getOrder(String id);
 
     /** Updates the order with the specified ID to match the specified order */

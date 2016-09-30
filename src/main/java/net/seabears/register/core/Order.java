@@ -22,6 +22,9 @@ public interface Order {
     /** Returns the order's price with subtotal and tax separate */
     OrderTotal getTotal();
 
+    /** Returns whether the order is empty (i.e. no items have been added) */
+    boolean isEmpty();
+
     /** Removes the item with the specified ID from the order */
     void removeItem(int id);
 

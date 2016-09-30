@@ -135,18 +135,26 @@ public class OrderController {
      * Submits an order. This assigns an "order number" to the order.
      * The customer can identify their order with this number.
      * This means the order is ready for preparations by the kitchen. Once an order is submitted, it cannot be modified.
+     * The order must have had items added to it.
      * @param id order ID
      * @return order number
      * @throws OrderNotFoundException if the order does not exist
      * @throws SubmittedOrderModificationException if the order is submitted
+     * @throws EmptyOrderException if the order contains no items
      */
     @RequestMapping(value = "/{id}/submit", method = RequestMethod.POST)
     public Map<String, Integer> submit(@PathVariable String id) {
         final Order order = getFreshOrderOrExit(id);
+        exitIfOrderIsEmpty(order);
         final int number = data.incrementAndGetOrderNumber();
         order.setNumber(number);
         data.updateOrder(id, order);
         return singletonMap("number", number);
     }
-}
 
+    private static void exitIfOrderIsEmpty(Order order) {
+        if (order.isEmpty()) {
+            throw new EmptyOrderException("order " + order.getId() + " contains no items");
+        }
+    }
+}

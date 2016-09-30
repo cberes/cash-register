@@ -2,6 +2,9 @@ package net.seabears.register.couchbase;
 
 import com.couchbase.client.java.document.json.JsonObject;
 
+/**
+ * Wrapper around a {@link com.couchbase.client.java.document.json.JsonObject} that stores the fields of the item.
+ */
 class Item implements net.seabears.register.core.Item {
     private final JsonObject json;
 

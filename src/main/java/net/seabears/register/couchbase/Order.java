@@ -12,9 +12,20 @@ import java.util.function.Function;
 
 import static java.util.stream.IntStream.range;
 
+/**
+ * A wrapper around a {@link com.couchbase.client.java.document.json.JsonObject} that stores the fields of the order.
+ * Items (with quantity and price per unit) are stored on each order as well.
+ */
 class Order implements net.seabears.register.core.Order {
     final JsonObject json;
 
+    /**
+     * Creates a new order object
+     * @param id unique ID
+     * @param tax tax as decimal percentage (e.g. 0.09 for 9%)
+     * @throws IllegalArgumentException if ID is empty
+     * @throws IllegalArgumentException if tax is negative
+     */
     Order(String id, double tax) {
         this(JsonObject.empty());
         Assert.hasText(id, "id must have text");
@@ -26,6 +37,7 @@ class Order implements net.seabears.register.core.Order {
         json.put("items", JsonArray.empty());
     }
 
+    /** Creates a new order object with the specified JSON */
     Order(@NotNull JsonObject json) {
         this.json = json;
     }
@@ -40,6 +52,10 @@ class Order implements net.seabears.register.core.Order {
         return json.getInt("number") != 0;
     }
 
+    /**
+     * @see net.seabears.register.core.Order#setNumber(int)
+     * @throws IllegalArgumentException if number is negative
+     */
     @Override
     public void setNumber(int number) {
         Assert.isTrue(number >= 0, "number cannot be negative");
@@ -60,6 +76,11 @@ class Order implements net.seabears.register.core.Order {
 
     private JsonArray getItems() {
         return json.getArray("items");
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return getItems().size() == 0;
     }
 
     @Override
@@ -86,6 +107,10 @@ class Order implements net.seabears.register.core.Order {
                 .findFirst();
     }
 
+    /**
+     * @see net.seabears.register.core.Order#addItem(Item, int)
+     * @throws IllegalArgumentException if quantity is zero or negative
+     */
     @Override
     public void addItem(@NotNull Item item, int quantity) {
         Assert.isTrue(quantity > 0, "quantity must be positive");
@@ -97,6 +122,10 @@ class Order implements net.seabears.register.core.Order {
         items.add(jsonItem);
     }
 
+    /**
+     * @see net.seabears.register.core.Order#updateItem(int, int, Function)
+     * @throws IllegalArgumentException if quantity is zero or negative
+     */
     @Override
     public void updateItem(int id, int quantity, @NotNull Function<Integer, Item> itemFunc) {
         Assert.isTrue(quantity > 0, "quantity must be positive");

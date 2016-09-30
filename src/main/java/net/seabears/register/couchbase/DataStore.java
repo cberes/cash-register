@@ -23,20 +23,25 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class DataStore implements net.seabears.register.core.DataStore {
+    /** Generates Couchbase keys for specific IDs */
     private static class Keys {
+        /** Returns the Couchbase key for an item with the specified ID */
         static String item(int id) {
             return DocumentType.ITEM + "_" + id;
         }
 
+        /** Returns the Couchbase key for an order with the specified ID */
         static String order(String id) {
             return DocumentType.ORDER + "_" + id;
         }
 
+        /** Returns the Couchbase key for a payment with the specified ID */
         static String tender(String id) {
             return DocumentType.TENDER + "_" + id;
         }
     }
 
+    /** Maximum order number allowed for the order number rolls over to one. */
     @Value("${order.num.max}")
     private long orderNumMax;
 
@@ -108,6 +113,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
 
     @Override
     public int incrementAndGetOrderNumber() {
+        // the minimum will be 1, and the maximum will be orderNumMax
         return (int) (bucket.counter("order_number", 1).content() % orderNumMax + 1L);
     }
 }
