@@ -51,3 +51,5 @@ To run a Couchbase server in a Docker container:
     docker run -d --name db -p 8091-8094:8091-8094 -p 11210:11210 couchbase
 
 The server will be accessible via HTTP at `http://localhost:8091` or from the console via `docker exec -it db sh`.
+
+The file `src/test/resources/items.n1ql` contains queries to populate a bucket with items.
