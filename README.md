@@ -28,7 +28,7 @@ A cash register web service
 
     curl -XPOST localhost:8080/orders/$ORDER_ID/submit
 
-### Tender paymanet
+### Tender payment
 
     curl -XPOST localhost:8080/tender -d'{"order_id":"'$ORDER_ID'","amount":1899,"method":"CASH"}' -H"Content-Type: application/json"
 
@@ -38,6 +38,8 @@ A cash register web service
 0. Couchbase bucket name: `cb.bucket` (default is `cash-register`)
 0. Couchbase password: `cb.password` (default is `cash-register-123`)
 0. Maximum order number: `order.num.max` (default is 100)
+
+Spring looks for the configuration file `application.properties` in the current directory or a `config` directory within the current directory.
 
 ## Dependencies
 
