@@ -56,6 +56,8 @@ public class DataStore implements net.seabears.register.core.DataStore {
 
     @Override
     public List<net.seabears.register.core.Item> getItems() {
+        // query for all documents with "item" type
+        // then get JsonObjects and convert to Items
         return bucket.query(Query.simple(select(i(bucket.name()) + ".*")
                 .from(i(bucket.name()))
                 .where(x("type").eq(s(DocumentType.ITEM.toString())))))
@@ -68,6 +70,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
 
     @Override
     public net.seabears.register.core.Item getItem(int id) {
+        // get value from document, and convert to Item (should be null safe)
         return Optional.ofNullable(bucket.get(Keys.item(id)))
                 .map(JsonDocument::content)
                 .map(Item::new)
@@ -83,6 +86,8 @@ public class DataStore implements net.seabears.register.core.DataStore {
 
     @Override
     public int getTotalPaid(String id) {
+        // query for all documents with "tender" type for this order
+        // then get JsonObjects and sum "amount" field
         return bucket.query(Query.simple(select(i(bucket.name()) + ".*")
                 .from(i(bucket.name()))
                 .where(x("type").eq(s(DocumentType.TENDER.toString()))
@@ -114,6 +119,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
 
     @Override
     public Order getOrder(@NotNull String id) {
+        // get value from document, and convert to Order (should be null safe)
         return Optional.ofNullable(bucket.get(Keys.order(id)))
                 .map(JsonDocument::content)
                 .map(Order::new)
