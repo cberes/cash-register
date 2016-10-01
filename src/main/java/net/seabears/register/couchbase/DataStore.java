@@ -41,7 +41,7 @@ public class DataStore implements net.seabears.register.core.DataStore {
         }
     }
 
-    /** Maximum order number allowed for the order number rolls over to one. */
+    /** Maximum order number allowed before the order number rolls over to one. */
     @Value("${order.num.max}")
     private long orderNumMax;
 
